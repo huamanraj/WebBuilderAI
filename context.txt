@@ -1,0 +1,83 @@
+Build an AI-powered website generator application with the following technologies:
+- Frontend: Vite, React, Tailwind CSS
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- External API: Perplexity API for AI-based code generation
+
+The application should have the following pages and features:
+ scalable component strucutre 
+1. LANDING PAGE:
+   - Create an eye-catching landing page with:
+     * Hero section explaining the app's purpose
+     * Feature highlights with icons/illustrations
+     * How it works section with step-by-step explanation
+     * CTA buttons for sign-up/login
+     * Testimonials or example websites created with the tool
+     * FAQ section
+   - Add smooth animations and transitions using Framer Motion
+   - Make the design modern and professional with Tailwind CSS
+
+2. AUTHENTICATION PAGES:
+   - Implement user registration with:
+     * Email/password signup
+     * Social login options (Google, GitHub)
+     * Email verification
+   - Create login page with:
+    
+   
+   - Add JWT-based authentication system
+   - Implement protected routes
+
+3. DASHBOARD PAGE:
+   - Design a clean dashboard with:
+     * Welcome message with user name
+     * Large prompt input section with example prompts
+     * Previous builds section with cards showing thumbnails
+     * Filtering/sorting options for previous builds
+     * Quick stats (builds created, last build date)
+   - Add pagination for previous builds
+   - Implement search functionality for finding past projects
+
+4. GENERATOR/PREVIEW PAGE:
+   - Create a split-screen layout with:
+     * Left side: Code editor with tabs for HTML, CSS, JS
+     * Right side: Live website preview 
+     * Code generation animation during processing
+     * Progress indicators for generation steps
+   - Add functionality to:
+     * View preview in full-screen mode
+     * Download all code files as ZIP package
+     * Copy individual code sections to clipboard
+     * Save the generated website to user's account
+     * Edit the generated code with real-time preview updates
+   - Implement syntax highlighting for code display
+   - Add code formatting options
+
+5. BACKEND REQUIREMENTS:
+   - Create RESTful API with Express:
+     * User authentication endpoints
+     * Website CRUD operations
+     * Code generation endpoint
+   - Implement Perplexity API integration:
+     * Format prompts for optimal code generation
+     * Parse and validate returned code
+     * Handle errors and fallbacks
+   - Set up MongoDB with Mongoose:
+     * User schema with authentication details
+     * Website schema storing all generated code
+     * Relationships between users and their websites
+
+6. ADDITIONAL FEATURES:
+
+   - Add project naming and description
+   - Create shareable links for generated websites
+   - Implement user profile management
+   - Add usage limits of 10 prompt per user daily 
+   - Create templates or example prompts to help users get started
+
+7. UI/UX CONSIDERATIONS:
+   - Use a consistent color scheme throughout the application
+   - Implement responsive design for all device sizes
+   - Add loading states and skeleton screens during API calls
+
+   - Add toast notifications for user actions

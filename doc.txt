@@ -1,0 +1,405 @@
+======================================================
+WEBBUILDER AI - PROJECT DOCUMENTATION
+======================================================
+
+This document provides a comprehensive overview of the WebBuilder AI application, 
+an AI-powered website generator that allows users to create websites by describing 
+them in natural language.
+
+TABLE OF CONTENTS:
+1. Project Overview
+2. Technology Stack
+3. Project Structure
+4. Backend API Documentation
+5. Frontend Component Structure
+6. Authentication Flow
+7. Website Generation Process
+8. Deployment Instructions
+9. Environment Variables
+10. Known Issues & Limitations
+
+======================================================
+1. PROJECT OVERVIEW
+======================================================
+
+WebBuilder AI is a full-stack application that leverages AI technology to generate 
+complete websites based on user prompts. Users can describe the website they want in 
+plain text, and the application generates HTML, CSS, and JavaScript code. The application 
+includes features like user authentication, a dashboard to manage websites, code editing 
+capabilities, and sharing functionality.
+
+Key Features:
+- User registration and authentication
+- AI-powered website generation
+- Real-time website preview
+- Code editing with syntax highlighting
+- Website sharing via public links
+- Website management (create, update, delete)
+- User profile management
+- Usage tracking and limits
+
+======================================================
+2. TECHNOLOGY STACK
+======================================================
+
+Frontend:
+- React.js (with Vite as build tool)
+- React Router for routing
+- TailwindCSS for styling
+- Framer Motion for animations
+- Axios for API requests
+- React Monaco Editor for code editing
+- JWT for authentication
+- React Toastify for notifications
+
+Backend:
+- Node.js with Express.js
+- MongoDB with Mongoose ODM
+- JSON Web Tokens (JWT) for authentication
+- Bcrypt.js for password hashing
+- Express Validator for request validation
+- Axios for external API communication
+- CORS for cross-origin resource sharing
+- Morgan for request logging
+
+External API:
+- Perplexity API for AI-based code generation
+
+======================================================
+3. PROJECT STRUCTURE
+======================================================
+
+Root Directory Structure:
+/webbuilder
+├── client/                  # Frontend React application
+│   ├── public/              # Public assets
+│   └── src/                 # Source files
+├── server/                  # Backend Node.js application
+│   ├── controllers/         # Request handlers
+│   ├── middleware/          # Express middleware
+│   ├── models/              # Mongoose models
+│   ├── routes/              # API routes
+│   ├── index.js             # Entry point
+│   └── package.json         # Dependencies
+├── .env                     # Environment variables
+└── documentation.txt        # This documentation
+
+Frontend (client) Structure:
+/client
+├── public/
+│   └── logo.svg             # Application logo
+├── src/
+│   ├── components/          # Reusable React components
+│   │   ├── common/          # Common UI components
+│   │   ├── dashboard/       # Dashboard-specific components
+│   │   ├── editor/          # Code editor components
+│   │   └── modals/          # Modal components
+│   ├── context/             # React context providers
+│   │   └── AuthContext.jsx  # Authentication context
+│   ├── layouts/             # Page layouts
+│   │   ├── MainLayout.jsx   # Layout for public pages
+│   │   └── DashboardLayout.jsx # Layout for authenticated pages
+│   ├── pages/               # Application pages
+│   │   ├── auth/            # Authentication pages
+│   │   ├── dashboard/       # Dashboard pages
+│   │   ├── LandingPage.jsx  # Homepage
+│   │   └── NotFoundPage.jsx # 404 page
+│   ├── App.jsx              # Main component with routes
+│   ├── main.jsx             # Application entry point
+│   └── index.css            # Global CSS
+├── index.html               # HTML entry point
+├── package.json             # Dependencies
+├── tailwind.config.js       # TailwindCSS configuration
+└── vite.config.js           # Vite configuration
+
+Backend (server) Structure:
+/server
+├── controllers/
+│   ├── authController.js    # Authentication controllers
+│   ├── generatorController.js # Website generation controllers
+│   └── websiteController.js # Website CRUD controllers
+├── middleware/
+│   └── auth.js              # Authentication middleware
+├── models/
+│   ├── User.js              # User model schema
+│   └── Website.js           # Website model schema
+├── routes/
+│   ├── auth.js              # Authentication routes
+│   ├── generator.js         # Generator routes
+│   └── websites.js          # Website CRUD routes
+├── index.js                 # Server entry point
+├── .env                     # Environment variables
+└── package.json             # Dependencies
+
+======================================================
+4. BACKEND API DOCUMENTATION
+======================================================
+
+Base URL: http://localhost:5000/api
+
+Authentication Endpoints:
+------------------------
+
+POST /auth/register
+- Description: Register a new user
+- Request Body:
+  * name: string (required)
+  * email: string (required)
+  * password: string (required, min 6 chars)
+- Response: { token, user }
+
+POST /auth/login
+- Description: Login existing user
+- Request Body:
+  * email: string (required)
+  * password: string (required)
+- Response: { token, user }
+
+GET /auth/me
+- Description: Get current user details
+- Headers: Authorization: Bearer <token>
+- Response: User object (excluding password)
+
+Website Endpoints:
+-----------------
+
+GET /websites
+- Description: Get all websites for authenticated user
+- Headers: Authorization: Bearer <token>
+- Query Parameters:
+  * page: number (default: 1)
+  * limit: number (default: 10)
+  * sort: string (optional, 'oldest')
+- Response: { websites: [], pagination: { total, page, pages } }
+
+GET /websites/:id
+- Description: Get a specific website by ID
+- Headers: Authorization: Bearer <token>
+- Response: Website object
+
+POST /websites
+- Description: Create a new website
+- Headers: Authorization: Bearer <token>
+- Request Body:
+  * title: string (required)
+  * description: string (optional)
+  * prompt: string (required)
+  * htmlCode: string (required)
+  * cssCode: string (required)
+  * jsCode: string (optional)
+  * isPublic: boolean (optional)
+- Response: Website object
+
+PUT /websites/:id
+- Description: Update a website
+- Headers: Authorization: Bearer <token>
+- Request Body: Any website fields to update
+- Response: Updated website object
+
+DELETE /websites/:id
+- Description: Delete a website
+- Headers: Authorization: Bearer <token>
+- Response: { message: 'Website removed' }
+
+GET /websites/share/:shareableLink
+- Description: Get a shared website by its shareable link
+- Response: Website object (if public)
+
+GET /websites/search
+- Description: Search user's websites
+- Headers: Authorization: Bearer <token>
+- Query Parameters:
+  * query: string (required)
+  * page: number (default: 1)
+  * limit: number (default: 10)
+- Response: { websites: [], pagination: { total, page, pages } }
+
+Generator Endpoints:
+-------------------
+
+POST /generator/generate
+- Description: Generate website code from a prompt
+- Headers: Authorization: Bearer <token>
+- Request Body:
+  * prompt: string (required)
+- Response: { htmlCode, cssCode, jsCode }
+
+GET /generator/examples
+- Description: Get example prompts
+- Headers: Authorization: Bearer <token>
+- Response: { examplePrompts: [] }
+
+======================================================
+5. FRONTEND COMPONENT STRUCTURE
+======================================================
+
+Layouts:
+-------
+- MainLayout: Layout wrapper for public pages with navigation and footer
+- DashboardLayout: Layout wrapper for authenticated pages with sidebar
+
+Pages:
+------
+Public Pages:
+- LandingPage: Homepage with features, how it works, testimonials, FAQ
+- LoginPage: User login form
+- RegisterPage: User registration form
+- NotFoundPage: 404 error page
+- SharedWebsitePage: Public view of a shared website
+
+Authenticated Pages:
+- DashboardPage: User dashboard with website stats and recent websites
+- CreateWebsitePage: Form to create new website with AI
+- MyWebsitesPage: List of all user's websites with search and filter
+- WebsiteEditorPage: Editor for viewing/editing website code with preview
+- ProfilePage: User profile management
+
+Components:
+----------
+Common:
+- LoadingSpinner: Animated loading indicator
+
+Dashboard:
+- WebsiteCard: Card component to display website info
+- EmptyState: Component shown when no items are found
+- Pagination: Component for paginated results
+
+Editor:
+- CodeEditor: Monaco editor component for code editing
+
+Modals:
+- ShareModal: Modal for sharing website functionality
+
+======================================================
+6. AUTHENTICATION FLOW
+======================================================
+
+1. Registration:
+   - User submits registration form with name, email, and password
+   - Server validates input and checks if email exists
+   - Password is hashed using bcrypt before saving
+   - JWT token is generated and returned along with user data
+   - Frontend stores token in localStorage
+
+2. Login:
+   - User submits login form with email and password
+   - Server validates credentials
+   - JWT token is generated and returned
+   - Frontend stores token in localStorage
+
+3. Authentication:
+   - JWT token is included in Authorization header for API requests
+   - Server middleware validates token and attaches user to request
+   - If token is invalid or expired, 401 error is returned
+
+4. Token Handling:
+   - Token is stored in localStorage
+   - Token is checked on application load
+   - Token expiration is verified before use
+   - Token is removed on logout
+
+5. Protected Routes:
+   - React Router routes use ProtectedRoute component
+   - Unauthenticated users are redirected to login page
+   - Original destination is saved and restored after login
+
+======================================================
+7. WEBSITE GENERATION PROCESS
+======================================================
+
+1. User Flow:
+   - User describes desired website in the prompt field
+   - User can view/select example prompts for guidance
+   - User submits the form
+   - System shows loading state while generating
+   - Generated website is displayed in editor
+
+2. Backend Process:
+   - Check if user has reached daily prompt limit (10/day)
+   - Format prompt for optimal AI response
+   - Call Perplexity API with formatted prompt
+   - Parse response to extract HTML, CSS, and JS code
+   - Return parsed code to frontend
+
+3. Data Structure:
+   - Prompt: Original user description
+   - HTML Code: Generated HTML structure
+   - CSS Code: Generated styles
+   - JS Code: Generated JavaScript functionality (if any)
+   - Title: Auto-generated or user-specified
+   - Description: Optional summary
+   - Shareable Link: Unique identifier for public sharing
+
+4. Code Handling:
+   - Code is displayed in Monaco Editor for each language
+   - Live preview is updated as code changes
+   - Code can be downloaded as ZIP file with separate files
+   - Code can be copied to clipboard
+
+======================================================
+8. DEPLOYMENT INSTRUCTIONS
+======================================================
+
+Local Development:
+
+Frontend (client):
+1. Navigate to client directory: `cd client`
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev`
+4. Frontend will be available at http://localhost:5173
+
+Backend (server):
+1. Navigate to server directory: `cd server`
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev`
+4. Backend will be available at http://localhost:5000
+
+Production Deployment:
+
+Frontend:
+1. Build the frontend: `cd client && npm run build`
+2. The built files will be in the `dist` directory
+3. Deploy these files to static hosting (Netlify, Vercel, etc.)
+
+Backend:
+1. Set up production environment variables
+2. Deploy to a Node.js hosting platform (Heroku, AWS, etc.)
+3. Ensure MongoDB connection string is properly configured
+
+======================================================
+9. ENVIRONMENT VARIABLES
+======================================================
+
+Backend (.env):
+- PORT: Server port (default: 5000)
+- MONGODB_URI: MongoDB connection string
+- JWT_SECRET: Secret key for JWT signing
+- PERPLEXITY_API_KEY: API key for Perplexity AI
+
+Frontend:
+- Configuration is handled through Vite proxy in development
+- Production URLs should be set in the client .env files
+
+======================================================
+10. KNOWN ISSUES & LIMITATIONS
+======================================================
+
+1. Website preview might not render certain advanced JavaScript features
+   due to iframe sandbox restrictions.
+
+2. AI generation is limited to 10 prompts per day per user on the free plan.
+
+3. The code editor may have performance issues with very large code files.
+
+4. There's no current implementation for actual deployment of generated websites 
+   to hosting services, only download or sharing via link.
+
+5. Actual payment integration for premium plans is not implemented.
+
+6. Social login (Google, GitHub) UI is present but functionality is not implemented.
+
+7. Password reset functionality UI is present but backend is not implemented.
+
+======================================================
+END OF DOCUMENTATION
+======================================================
