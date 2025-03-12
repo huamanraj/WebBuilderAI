@@ -67,7 +67,7 @@ UserSchema.methods.hasReachedPromptLimit = function() {
     this.promptsResetDate = now;
   }
   
-  return this.promptsUsedToday >= 15;
+  return this.promptsUsedToday >= 2;
 };
 
 module.exports = mongoose.model('User', UserSchema);
