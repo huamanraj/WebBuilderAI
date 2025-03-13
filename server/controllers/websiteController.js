@@ -1,7 +1,14 @@
 const Website = require('../models/Website');
-// Fix nanoid import (use createRequire to properly handle the ES module)
-const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10);
+// Use a CommonJS-compatible approach for generating IDs
+const crypto = require('crypto');
+
+// Function to generate a random ID similar to nanoid
+const generateRandomId = (length = 10) => {
+  return crypto.randomBytes(length)
+    .toString('base64')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, length);
+};
 
 // Get all websites for a user
 exports.getAllWebsites = async (req, res) => {
@@ -57,8 +64,8 @@ exports.createWebsite = async (req, res) => {
   try {
     const { title, description, prompt, htmlCode, cssCode, jsCode, isPublic } = req.body;
     
-    // Generate unique shareable link
-    const shareableLink = nanoid();
+    // Generate unique shareable link using our custom function
+    const shareableLink = generateRandomId(10);
 
     const website = new Website({
       user: req.user._id,
