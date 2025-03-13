@@ -1,5 +1,7 @@
 const Website = require('../models/Website');
-const { nanoid } = require('nanoid');
+// Fix nanoid import (use createRequire to properly handle the ES module)
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10);
 
 // Get all websites for a user
 exports.getAllWebsites = async (req, res) => {
@@ -56,7 +58,7 @@ exports.createWebsite = async (req, res) => {
     const { title, description, prompt, htmlCode, cssCode, jsCode, isPublic } = req.body;
     
     // Generate unique shareable link
-    const shareableLink = nanoid(10);
+    const shareableLink = nanoid();
 
     const website = new Website({
       user: req.user._id,

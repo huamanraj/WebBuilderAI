@@ -26,11 +26,8 @@ app.use('/api/websites', websiteRoutes);
 app.use('/api/generator', generatorRoutes);
 app.use('/api/images', imageRoutes);
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webbuilder', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// MongoDB Connection - removed deprecated options
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webbuilder')
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
@@ -49,6 +46,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+// Start server with port availability check
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`Port ${PORT} is already in use. Trying port ${PORT + 1}...`);
+    app.listen(PORT + 1, () => {
+      console.log(`Server running on port ${PORT + 1} instead`);
+    });
+  } else {
+    console.error('Server error:', err);
+  }
 });

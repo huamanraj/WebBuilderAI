@@ -27,8 +27,8 @@ exports.generateWebsite = async (req, res) => {
      - Include proper image optimization with responsive sizing
      
     
-    For any images needed, use this pattern in JavaScript:
-    fetch('/api/images?query=KEYWORD')
+    For any images needed(may use this not compolsory), use this pattern in JavaScript:
+    fetch('https://web-builder-ai-backend.vercel.app/api/images?query=KEYWORD')
       .then(res => res.json())
       .then(data => {
         // data.images contains array of {url, alt} objects
