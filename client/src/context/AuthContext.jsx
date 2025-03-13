@@ -2,6 +2,11 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 
+// Set base URL for production
+if (import.meta.env.PROD) {
+  axios.defaults.baseURL = 'https://web-builder-ai-backend.vercel.app';
+}
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
