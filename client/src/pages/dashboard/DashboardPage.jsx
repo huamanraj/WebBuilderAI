@@ -11,6 +11,9 @@ import EmptyState from '../../components/dashboard/EmptyState';
 import Pagination from '../../components/dashboard/Pagination';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const DashboardPage = () => {
   const { user } = useAuth();
   const [websites, setWebsites] = useState([]);
@@ -40,7 +43,7 @@ const DashboardPage = () => {
         endpoint = `/api/websites/search?query=${search}&page=1&limit=6`;
       }
       
-      const response = await axios.get(endpoint);
+      const response = await axios.get(`${API_BASE_URL}${endpoint}`);
       setWebsites(response.data.websites);
       setPagination(response.data.pagination);
     } catch (error) {

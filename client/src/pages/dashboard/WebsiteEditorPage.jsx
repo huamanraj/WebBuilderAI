@@ -11,6 +11,9 @@ import CodeEditor from '../../components/editor/CodeEditor';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ShareModal from '../../components/modals/ShareModal';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const WebsiteEditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,7 +35,7 @@ const WebsiteEditorPage = () => {
   const fetchWebsite = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/websites/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/api/websites/${id}`);
       setWebsite(response.data);
       setHtmlCode(response.data.htmlCode);
       setCssCode(response.data.cssCode);
@@ -85,7 +88,7 @@ const WebsiteEditorPage = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await axios.put(`/api/websites/${id}`, {
+      await axios.put(`${API_BASE_URL}/api/websites/${id}`, {
         htmlCode,
         cssCode,
         jsCode

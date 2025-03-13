@@ -7,6 +7,9 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const ProfilePage = () => {
   const { user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -49,7 +52,7 @@ const ProfilePage = () => {
       });
       
       // Get website count
-      const websitesResponse = await axios.get('/api/websites?limit=1');
+      const websitesResponse = await axios.get(`${API_BASE_URL}/api/websites?limit=1`);
       if (websitesResponse.data.pagination) {
         setUsageSummary(prev => ({
           ...prev,
@@ -80,7 +83,7 @@ const ProfilePage = () => {
     
     try {
       // In a real app, you would have an API endpoint for this
-      // const response = await axios.put('/api/users/profile', {
+      // const response = await axios.put(`${API_BASE_URL}/api/users/profile`, {
       //   name: profileData.name,
       //   currentPassword: profileData.currentPassword,
       //   newPassword: profileData.newPassword || undefined

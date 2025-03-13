@@ -7,6 +7,9 @@ import { toast } from 'react-toastify';
 import MainLayout from '../../layouts/MainLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const SharedWebsitePage = () => {
   const { shareableLink } = useParams();
   const [website, setWebsite] = useState(null);
@@ -20,7 +23,7 @@ const SharedWebsitePage = () => {
   const fetchWebsite = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/websites/share/${shareableLink}`);
+      const response = await axios.get(`${API_BASE_URL}/api/websites/share/${shareableLink}`);
       setWebsite(response.data);
     } catch (error) {
       console.error('Error fetching website:', error);

@@ -6,6 +6,9 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const WebsiteCard = ({ website, viewMode = 'grid' }) => {
   const { _id, title, description, createdAt, prompt } = website;
   const [thumbnailUrl, setThumbnailUrl] = useState(website.thumbnail || 'https://www.designbombs.com/wp-content/uploads/2017/02/make-a-website.jpg');
@@ -15,7 +18,7 @@ const WebsiteCard = ({ website, viewMode = 'grid' }) => {
     const fetchThumbnail = async () => {
       if (!website.thumbnail && title) {
         try {
-          const response = await axios.get(`/api/images?query=${encodeURIComponent(title)}`);
+          const response = await axios.get(`${API_BASE_URL}/api/images?query=${encodeURIComponent(title)}`);
           if (response.data && response.data.images && response.data.images.length > 0) {
             setThumbnailUrl(response.data.images[0].url);
           }
@@ -34,7 +37,7 @@ const WebsiteCard = ({ website, viewMode = 'grid' }) => {
 
     if (window.confirm('Are you sure you want to delete this website?')) {
       try {
-        await axios.delete(`/api/websites/${_id}`);
+        await axios.delete(`${API_BASE_URL}/api/websites/${_id}`);
         toast.success('Website deleted successfully');
         // You might need to refresh the list after deletion
       } catch (error) {

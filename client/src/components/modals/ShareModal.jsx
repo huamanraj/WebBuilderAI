@@ -4,6 +4,9 @@ import { FaTimes, FaCopy, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const ShareModal = ({ onClose, website }) => {
   const [isPublic, setIsPublic] = useState(website?.isPublic || false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -13,7 +16,7 @@ const ShareModal = ({ onClose, website }) => {
   const handleToggleVisibility = async () => {
     try {
       setIsUpdating(true);
-      await axios.put(`/api/websites/${website._id}`, { isPublic: !isPublic });
+      await axios.put(`${API_BASE_URL}/api/websites/${website._id}`, { isPublic: !isPublic });
       setIsPublic(!isPublic);
       toast.success(isPublic 
         ? 'Website is now private' 

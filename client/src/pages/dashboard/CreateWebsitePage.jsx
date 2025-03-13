@@ -7,6 +7,9 @@ import axios from 'axios';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const CreateWebsitePage = () => {
   const [prompt, setPrompt] = useState('');
   const [title, setTitle] = useState('');
@@ -22,7 +25,7 @@ const CreateWebsitePage = () => {
 
   const fetchExamplePrompts = async () => {
     try {
-      const response = await axios.get('/api/generator/examples');
+      const response = await axios.get(`${API_BASE_URL}/api/generator/examples`);
       setExamplePrompts(response.data.examplePrompts);
     } catch (error) {
       console.error('Error fetching example prompts:', error);
@@ -70,7 +73,7 @@ const CreateWebsitePage = () => {
       setIsGenerating(true);
       
       // Step 1: Generate website code
-      const generatorResponse = await axios.post('/api/generator/generate', { prompt });
+      const generatorResponse = await axios.post(`${API_BASE_URL}/api/generator/generate`, { prompt });
       
       const { htmlCode, cssCode, jsCode } = generatorResponse.data;
       
@@ -85,7 +88,7 @@ const CreateWebsitePage = () => {
         isPublic: false
       };
       
-      const saveResponse = await axios.post('/api/websites', websiteData);
+      const saveResponse = await axios.post(`${API_BASE_URL}/api/websites`, websiteData);
       
       toast.success('Website generated successfully!');
       navigate(`/website/${saveResponse.data._id}`);
