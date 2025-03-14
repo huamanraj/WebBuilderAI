@@ -2,31 +2,24 @@ const express = require('express');
 const cors = require('cors');
 const generatorController = require('../controllers/generatorController');
 const auth = require('../middleware/auth');
+const { corsOptions } = require('../middleware/cors-middleware');
 
 const router = express.Router();
 
-// CORS options for generator routes
-const generatorCorsOptions = {
-  origin: ['https://webbuilder.amanraj.me', 'http://localhost:3000', 'https://web-builder-ai-backend.vercel.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  credentials: true,
-  maxAge: 86400, // 24 hours
-  exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization']
-};
-
 // Explicitly handle OPTIONS requests for preflight
-router.options('*', cors(generatorCorsOptions));
+router.options('*', cors(corsOptions));
 
-// Apply CORS before auth middleware
-router.use(cors(generatorCorsOptions));
+// Apply CORS before anything else
+router.use(cors(corsOptions));
 
-// Apply auth after CORS
-router.use(auth);
-
-// Error handler middleware for generator routes
+// Custom error handling middleware specifically for generator routes
 const generatorErrorHandler = (err, req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || '*');
+  // Ensure CORS headers are present in error responses
+  res.header("Access-Control-Allow-Origin", req.headers.origin || corsOptions.origin[0]);
   res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Error processing generator request',
@@ -34,15 +27,29 @@ const generatorErrorHandler = (err, req, res, next) => {
   });
 };
 
-// Generate website from prompt with increased timeout
-router.post('/generate', (req, res, next) => {
-  // Set longer timeout for this specific endpoint
-  req.setTimeout(300000); // 5 minutes
-  res.setTimeout(300000);
-  next();
-}, generatorController.generateWebsite, generatorErrorHandler);
+// Apply CORS to the specific generate route with its own error handler
+router.post('/generate', 
+  cors(corsOptions),  // Apply CORS again at the route level
+  (req, res, next) => {
+    // Set longer timeout for this endpoint
+    req.setTimeout(300000); // 5 minutes
+    res.setTimeout(300000);
+    
+    // Add CORS headers immediately
+    res.header("Access-Control-Allow-Origin", req.headers.origin || corsOptions.origin[0]);
+    res.header("Access-Control-Allow-Credentials", "true");
+    
+    next();
+  },
+  auth,  // Apply auth after CORS is ensured
+  generatorController.generateWebsite,
+  generatorErrorHandler
+);
 
-// Get example prompts
-router.get('/examples', generatorController.getExamplePrompts);
+// Get example prompts with CORS
+router.get('/examples', cors(corsOptions), auth, generatorController.getExamplePrompts);
+
+// Apply error handler at router level
+router.use(generatorErrorHandler);
 
 module.exports = router;
