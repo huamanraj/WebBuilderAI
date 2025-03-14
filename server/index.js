@@ -18,10 +18,14 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin: ['https://webbuilder.amanraj.me', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  preflightContinue: false
 };
+
+// Enable pre-flight requests for all routes
+app.options('*', cors(corsOptions));
 
 // Middleware
 app.use(cors(corsOptions));
