@@ -16,22 +16,34 @@ const PORT = process.env.PORT || 5000;
 
 // CORS Configuration
 const corsOptions = {
-  origin: ['https://webbuilder.amanraj.me', 'http://localhost:3000'],
+  origin: ['https://webbuilder.amanraj.me', 'http://localhost:3000', 'https://web-builder-ai-backend.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 204,
-  preflightContinue: false
+  preflightContinue: false,
+  maxAge: 86400 // 24 hours cache for preflight requests
 };
 
 // Enable pre-flight requests for all routes
 app.options('*', cors(corsOptions));
 
-// Middleware
+// Middleware - apply CORS before any route handlers
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Increase request timeout for long-running operations
+app.use((req, res, next) => {
+  // Set a longer timeout for specific routes
+  if (req.path.includes('/api/generator')) {
+    req.setTimeout(300000); // 5 minutes for generator routes
+    res.setTimeout(300000);
+  }
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -41,20 +53,27 @@ app.use('/api/images', imageRoutes);
 
 // MongoDB Connection - removed deprecated options
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webbuilder')
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => console.log('******MongoDB connected'))
+.catch(err => console.error('*****MongoDB connection error:', err));
 
 // Health check route
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Error handler
+// Error handler - ensure CORS headers are included in error responses
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
+  
+  // Set CORS headers for error responses
+  res.header("Access-Control-Allow-Origin", req.headers.origin || '*');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+  
+  res.status(err.status || 500).json({
     success: false,
-    message: 'Server error',
+    message: err.message || 'Server error',
     error: process.env.NODE_ENV === 'production' ? {} : err
   });
 });
