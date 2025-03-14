@@ -52,7 +52,7 @@ app.use('/api/generator', generatorRoutes);
 app.use('/api/images', imageRoutes);
 
 // MongoDB Connection - removed deprecated options
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webbuilder')
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('******MongoDB connected'))
 .catch(err => console.error('*****MongoDB connection error:', err));
 
