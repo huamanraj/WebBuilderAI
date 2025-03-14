@@ -4,7 +4,7 @@ const cors = require('cors');
 const corsOptions = {
   origin: [
     'https://webbuilder.amanraj.me', 
-    'http://localhost:3000',
+    'http://localhost:5173',
     'https://web-builder-ai-backend.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
