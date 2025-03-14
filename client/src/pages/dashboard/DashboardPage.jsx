@@ -103,7 +103,7 @@ const DashboardPage = () => {
             <h3 className="text-sm font-medium text-muted-foreground">Daily Prompts</h3>
             <p className="text-3xl font-semibold mt-2 text-gray-900">
               {user?.promptsUsedToday || 0}
-              <span className="text-muted-foreground text-base font-normal">/2</span>
+              <span className="text-muted-foreground text-base font-normal">/5</span>
             </p>
           </div>
 

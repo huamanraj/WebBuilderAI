@@ -10,6 +10,16 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 // Get the API base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
+// Configure axios with default settings
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 60000, // 2 minute timeout for generator
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
 const CreateWebsitePage = () => {
   const [prompt, setPrompt] = useState('');
   const [title, setTitle] = useState('');
@@ -72,8 +82,22 @@ const CreateWebsitePage = () => {
     try {
       setIsGenerating(true);
       
-      // Step 1: Generate website code
-      const generatorResponse = await axios.post(`${API_BASE_URL}/api/generator/generate`, { prompt });
+      // Step 1: Generate website code with retry logic
+      let generatorResponse;
+      try {
+        // First try with axios client with CORS credentials
+        generatorResponse = await apiClient.post('/api/generator/generate', { prompt });
+      } catch (generatorError) {
+        console.log('First generator attempt failed:', generatorError);
+        
+        // Fallback: Try without credentials if CORS is the issue
+        generatorResponse = await axios.post(`${API_BASE_URL}/api/generator/generate`, { prompt }, {
+          timeout: 120000,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      }
       
       const { htmlCode, cssCode, jsCode } = generatorResponse.data;
       
@@ -88,17 +112,22 @@ const CreateWebsitePage = () => {
         isPublic: false
       };
       
-      const saveResponse = await axios.post(`${API_BASE_URL}/api/websites`, websiteData);
+      const saveResponse = await apiClient.post('/api/websites', websiteData);
       
       toast.success('Website generated successfully!');
       navigate(`/website/${saveResponse.data._id}`);
       
     } catch (error) {
+      console.error('Error generating website:', error);
+      
       if (error.response?.status === 429) {
         toast.error('Daily prompt limit reached. Try again tomorrow.');
+      } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        toast.error('Request timed out. The generation process took too long.');
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Network error. Please check your connection and try again.');
       } else {
-        toast.error(error.response?.data?.message || 'Failed to generate website');
-        console.error('Error generating website:', error);
+        toast.error(error.response?.data?.message || 'Failed to generate website. Please try again later.');
       }
     } finally {
       setIsGenerating(false);

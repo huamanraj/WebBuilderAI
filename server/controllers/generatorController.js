@@ -24,10 +24,6 @@ exports.generateWebsite = async (req, res) => {
       });
     }
 
-    // Update user's prompt usage
-    user.promptsUsedToday += 1;
-    await user.save();
-
     // Format the prompt for better results
     const formattedPrompt = `Generate a fully responsive, modern, and minimal website with a clean UI based on the following description. The design should use smooth animations, a mobile-first approach, and follow 2025 web design trends.
        WEBSITE SPECIFICATIONS:
@@ -107,6 +103,10 @@ exports.generateWebsite = async (req, res) => {
       const cssCode = cssMatch ? cleanMarkdownCodeBlocks(cssMatch[1].trim()) : '';
       const jsCode = jsMatch ? cleanMarkdownCodeBlocks(jsMatch[1].trim()) : '';
 
+      // Only increment prompt count after successful generation
+      user.promptsUsedToday += 1;
+      await user.save();
+
       res.json({
         success: true,
         htmlCode,
@@ -115,6 +115,7 @@ exports.generateWebsite = async (req, res) => {
       });
     } catch (error) {
       console.error('Generator error:', error);
+      // Don't increment prompt count when there's an error
       res.status(500).json({ 
         message: 'Failed to generate website', 
         error: error.response?.data || error.message 
