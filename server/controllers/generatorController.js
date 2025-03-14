@@ -4,6 +4,16 @@ const User = require('../models/User');
 // Generate website code from prompt
 exports.generateWebsite = async (req, res) => {
   try {
+    // Always set CORS headers first thing
+    res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://webbuilder.amanraj.me');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+    // Increase timeout for this operation (may not work in serverless environment)
+    if (req.setTimeout) req.setTimeout(300000);
+    if (res.setTimeout) res.setTimeout(300000);
+
     const { prompt } = req.body;
     const user = req.user;
 
@@ -121,6 +131,10 @@ exports.generateWebsite = async (req, res) => {
 
 // Get example prompts to help users
 exports.getExamplePrompts = async (req, res) => {
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://webbuilder.amanraj.me');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
   try {
     const examplePrompts = [
       "Create a landing page for a fitness app with a modern design, sign-up form, and feature highlights",

@@ -14,9 +14,20 @@ const imageRoutes = require('./routes/imageRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS Configuration
+// CORS Configuration - Update to handle all possible request paths
 const corsOptions = {
-  origin: ['https://webbuilder.amanraj.me', 'http://localhost:3000', 'https://web-builder-ai-backend.vercel.app'],
+  origin: function (origin, callback) {
+    const allowedOrigins = ['https://webbuilder.amanraj.me', 'http://localhost:3000', 'https://web-builder-ai-backend.vercel.app'];
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      // Allow the request to continue despite origin not being in the allowed list
+      // This is more permissive but helps with debugging
+      callback(null, true);
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
@@ -26,10 +37,27 @@ const corsOptions = {
   maxAge: 86400 // 24 hours cache for preflight requests
 };
 
-// Enable pre-flight requests for all routes
-app.options('*', cors(corsOptions));
+// Vercel-specific middleware to ensure CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://webbuilder.amanraj.me');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Handle preflight requests immediately
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
-// Middleware - apply CORS before any route handlers
+// Enable pre-flight requests for all routes
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
+
+// Apply standard CORS middleware after custom headers
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
