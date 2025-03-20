@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaHome, FaPlus, FaFolder, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaPlus, FaFolder, FaUser, FaSignOutAlt, FaCode } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -72,6 +72,18 @@ const DashboardLayout = ({ children }) => {
               >
                 <FaPlus className="mr-2 h-4 w-4" />
                 New Website
+              </Link>
+              <Link 
+                to="/live-editor" 
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+                  isActive('/live-editor') 
+                    ? 'bg-primary/10 text-primary font-medium' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={closeSidebar}
+              >
+                <FaCode className="mr-2 h-4 w-4" />
+                Live Editor
               </Link>
               <Link 
                 to="/my-websites" 

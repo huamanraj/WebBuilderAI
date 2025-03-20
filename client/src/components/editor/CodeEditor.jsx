@@ -3,6 +3,9 @@ import MonacoEditor from 'react-monaco-editor';
 
 const CodeEditor = ({ language = 'javascript', value = '', onChange, options = {} }) => {
   const editorRef = useRef(null);
+  
+  // Check if we're in full-page mode by looking at options
+  const isFullPage = options.fontSize === 15;
 
   const defaultOptions = {
     selectOnLineNumbers: true,
@@ -11,7 +14,7 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange, options = {
     cursorStyle: 'line',
     automaticLayout: true,
     minimap: {
-      enabled: false
+      enabled: isFullPage ? true : false
     },
     scrollBeyondLastLine: false,
     lineNumbers: 'on',
@@ -53,9 +56,9 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange, options = {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-280px)] overflow-hidden">
+    <div className={`${isFullPage ? 'h-[calc(100vh-90px)]' : 'h-[calc(100vh-280px)]'} overflow-hidden`}>
       <MonacoEditor
-        height="calc(100vh - 350px)"
+        height={isFullPage ? "calc(100vh - 90px)" : "calc(100vh - 350px)"}
         language={language}
         value={value}
         options={defaultOptions}

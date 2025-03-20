@@ -379,6 +379,18 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Built by Footer */}
+        <div className="mt-8 text-center">
+          <a 
+            href="https://amanraj.me" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-gray-600 hover:text-primary transition-colors duration-300 text-sm font-medium"
+          >
+            BUILT BY AMAN RAJ
+          </a>
+        </div>
       </motion.div>
     </DashboardLayout>
   );

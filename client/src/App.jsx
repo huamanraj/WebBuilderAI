@@ -16,6 +16,7 @@ import CreateWebsitePage from './pages/dashboard/CreateWebsitePage';
 import MyWebsitesPage from './pages/dashboard/MyWebsitesPage';
 import ProfilePage from './pages/dashboard/ProfilePage';
 import WebsiteEditorPage from './pages/dashboard/WebsiteEditorPage';
+import LiveEditorPage from './pages/dashboard/LiveEditorPage';
 import SharedWebsitePage from './pages/dashboard/SharedWebsitePage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -47,6 +48,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/create" element={<CreateWebsitePage />} />
+            <Route path="/live-editor" element={<LiveEditorPage />} />
+            <Route path="/full-editor" element={<LiveEditorPage fullPage={true} />} />
             <Route path="/my-websites" element={<MyWebsitesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/website/:id" element={<WebsiteEditorPage />} />
