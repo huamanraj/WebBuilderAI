@@ -6,19 +6,27 @@ import { FaLightbulb, FaRandom, FaBrain } from 'react-icons/fa';
 import axios from 'axios';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import TimerCountdown from '../../components/common/TimerCountdown';
+import { useAuth } from '../../context/AuthContext'; // Add this import
 
 // Get the API base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 // Configure axios with default settings
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 60000, // 2 minute timeout for generator
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
+const createApiClient = () => {
+  // Get the token from localStorage
+  const token = localStorage.getItem('token');
+  
+  return axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 300000, // 5 minute timeout for generator
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    }
+  });
+};
 
 const CreateWebsitePage = () => {
   const [prompt, setPrompt] = useState('');
@@ -28,6 +36,7 @@ const CreateWebsitePage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const navigate = useNavigate();
+  const { token, isAuthenticated } = useAuth(); // Get auth info
 
   useEffect(() => {
     fetchExamplePrompts();
@@ -35,10 +44,14 @@ const CreateWebsitePage = () => {
 
   const fetchExamplePrompts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/generator/examples`);
+      const apiClient = createApiClient();
+      const response = await apiClient.get('/api/generator/examples');
       setExamplePrompts(response.data.examplePrompts);
     } catch (error) {
       console.error('Error fetching example prompts:', error);
+      if (error.response?.status === 401) {
+        toast.error('Authentication required. Please log in again.');
+      }
     }
   };
 
@@ -78,25 +91,34 @@ const CreateWebsitePage = () => {
       toast.error('Please enter a title for your website');
       return;
     }
+
+    if (!isAuthenticated) {
+      toast.error('You must be logged in to create a website');
+      navigate('/login');
+      return;
+    }
     
     try {
       setIsGenerating(true);
       
-      // Step 1: Generate website code with retry logic
+      // Create a fresh API client with the latest token
+      const apiClient = createApiClient();
+      
+      // Step 1: Generate website code
       let generatorResponse;
       try {
-        // First try with axios client with CORS credentials
         generatorResponse = await apiClient.post('/api/generator/generate', { prompt });
       } catch (generatorError) {
-        console.log('First generator attempt failed:', generatorError);
+        console.log('Generator request failed:', generatorError);
         
-        // Fallback: Try without credentials if CORS is the issue
-        generatorResponse = await axios.post(`${API_BASE_URL}/api/generator/generate`, { prompt }, {
-          timeout: 120000,
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
+        if (generatorError.response?.status === 401) {
+          toast.error('Authentication expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+        
+        // If it's not an auth error, rethrow it to be caught by the outer try/catch
+        throw generatorError;
       }
       
       const { htmlCode, cssCode, jsCode } = generatorResponse.data;
@@ -120,7 +142,10 @@ const CreateWebsitePage = () => {
     } catch (error) {
       console.error('Error generating website:', error);
       
-      if (error.response?.status === 429) {
+      if (error.response?.status === 401) {
+        toast.error('Authentication required. Please log in again.');
+        navigate('/login');
+      } else if (error.response?.status === 429) {
         toast.error('Daily prompt limit reached. Try again tomorrow.');
       } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
         toast.error('Request timed out. The generation process took too long.');
@@ -241,7 +266,7 @@ const CreateWebsitePage = () => {
               >
                 {isGenerating ? (
                   <>
-                    <LoadingSpinner size="sm" className="mr-2" /> Generating Website...
+                    <LoadingSpinner size="sm" className="mr-2" /> Generating Website... <TimerCountdown />
                   </>
                 ) : (
                   <>

@@ -1,42 +1,35 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
-    // Handle preflight OPTIONS requests
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
-    }
-    
+    // Get token from header
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
+    // Check if no token
     if (!token) {
-      const error = new Error('Authentication required');
-      error.status = 401;
-      throw error;
+      return res.status(401).json({ message: 'No authentication token, access denied' });
     }
-    
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      const error = new Error('User not found');
-      error.status = 401;
-      throw error;
+
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Add user from payload
+      const user = await User.findById(decoded.id).select('-password');
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found, authentication invalid' });
+      }
+      
+      req.user = user;
+      next();
+    } catch (tokenError) {
+      console.error('Token verification error:', tokenError);
+      return res.status(401).json({ message: 'Token is not valid or has expired' });
     }
-    
-    req.user = user;
-    next();
   } catch (error) {
-    // Ensure CORS headers are present even in error responses
-    res.header("Access-Control-Allow-Origin", req.headers.origin || '*');
-    res.header("Access-Control-Allow-Credentials", "true");
-    
-    res.status(error.status || 401).json({ 
-      success: false,
-      message: error.message || 'Authentication failed'
-    });
+    console.error('Auth middleware error:', error);
+    res.status(500).json({ message: 'Server error in authentication' });
   }
 };
-
-module.exports = auth;

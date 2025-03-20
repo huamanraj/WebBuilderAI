@@ -62,6 +62,11 @@ exports.getWebsiteById = async (req, res) => {
 // Create website
 exports.createWebsite = async (req, res) => {
   try {
+    // Check if user exists in the request
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
     const { title, description, prompt, htmlCode, cssCode, jsCode, isPublic } = req.body;
     
     // Generate unique shareable link using our custom function
@@ -82,7 +87,7 @@ exports.createWebsite = async (req, res) => {
     await website.save();
     res.status(201).json(website);
   } catch (error) {
-    console.error(error);
+    console.error('Website creation error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
