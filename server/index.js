@@ -80,9 +80,13 @@ app.use('/api/generator', generatorRoutes);
 app.use('/api/images', imageRoutes);
 
 // MongoDB Connection - removed deprecated options
-mongoose.connect(process.env.MONGODB_URI)
-.then(() => console.log('******MongoDB connected'))
-.catch(err => console.error('*****MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI,{
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000, // Increase timeout to 30s
+})
+  .then(() => console.log('\n******  MongoDB connected ******\n'))
+.catch(err => console.error('\n*****MongoDB connection error:', err));
 
 // Health check route
 app.get('/', (req, res) => {
@@ -108,14 +112,14 @@ app.use((err, req, res, next) => {
 
 // Start server with port availability check
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`\nServer running on port ${PORT}\n`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.log(`Port ${PORT} is already in use. Trying port ${PORT + 1}...`);
+    console.log(`\nPort ${PORT} is already in use. Trying port ${PORT + 1}...`);
     app.listen(PORT + 1, () => {
       console.log(`Server running on port ${PORT + 1} instead`);
     });
   } else {
-    console.error('Server error:', err);
+    console.error('\nServer error:', err);
   }
 });
