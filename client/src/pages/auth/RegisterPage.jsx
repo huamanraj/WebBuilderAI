@@ -163,7 +163,7 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t"></div>
             </div>
@@ -189,7 +189,7 @@ const RegisterPage = () => {
               <FaGithub className="mr-2 h-4 w-4" />
               GitHub
             </button>
-          </div>
+          </div>   */}
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
